@@ -39,9 +39,13 @@ NOHUP=/usr/bin/nohup
 SELENIUMPIDFILE=/var/run/Selenium-RC.pid
 
 start() {
+	if [ -n "$FIREFOX_TEMPLATE" ]; then
+		[[ -d $FIREFOX_TEMPLATE ]] || mkdir -p $FIREFOX_TEMPLATE
+	else
+		
+	fi
         log_daemon_msg "Starting Xvfb"
-	daemon --dbglog=$LOG --errlog=$LOG --stdout=$LOG --stderr=$LOG\
-		--name Xvfb -- $XVFB :$DISPLAY_NO -ac -screen 0 1024x768x8
+	daemon --dbglog=$LOG --errlog=$LOG --stdout=$LOG --stderr=$LOG --name Xvfb -- $XVFB :$DISPLAY_NO -ac -screen 0 1024x768x8
 	log_end_msg $?
         log_daemon_msg "Starting Selenium RC"
 	if [ -n "$DEBUGLOG" ]; then
@@ -49,9 +53,7 @@ start() {
 	else
 		DBG=""
 	fi
-	daemon --dbglog=$LOG --errlog=$LOG --stdout=$LOG --stderr=$LOG\
-		--name Selenium-RC -i --env=DISPLAY=$DISPLAY_NO\
-		-- $JAVA -jar $SELENIUM_JAR $DBG-firefoxProfileTemplate $FIREFOX_TEMPLATE
+	daemon --dbglog=$LOG --errlog=$LOG --stdout=$LOG --stderr=$LOG --name Selenium-RC -i --env=DISPLAY=:$DISPLAY_NO -- $JAVA -jar $SELENIUM_JAR $DBG-firefoxProfileTemplate $FIREFOX_TEMPLATE
 	log_end_msg $?
         return
 }
